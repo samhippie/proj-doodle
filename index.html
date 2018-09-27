@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="stylesheet" type="text/css" href="index.css">
+		<script type="text/javascript" src="script.js"></script>
+	</head>
+	<body>
+		<canvas id="input-canvas" width="500" height = "500"></canvas>
+		<canvas id="output-canvas" width="500" height = "500"></canvas>
+		<br>
+			f(x,y) = (
+				<input id="xTrans" type="text" value="x">
+			,
+				<input id="yTrans" type="text" value="y">
+			)
+			<button id="trans-submit">Apply</button>
+		<br>
+		f: [-1,1]² → [-1,1]²
+		<br>
+		<button id="clear">Clear Canvas</button>
+		<p>Draw on the left canvas. Set the output of f (with javascript syntax using x and y) to set the transformation. Click Apply to apply the transformation. </p>
+		<p>Here's a neat one:<p>
+		(x * Math.sqrt(x**2 + y**2) / Math.max(Math.abs(x), Math.abs(y)),<br>
+		y * Math.sqrt(x**2 + y**2) / Math.max(Math.abs(x), Math.abs(y)))<br>
+		<p>With inverse:</p>
+		(x * Math.max(Math.abs(x), Math.abs(y)) / Math.sqrt(x**2 + y**2),<br>
+		y * Math.max(Math.abs(x), Math.abs(y)) / Math.sqrt(x**2 + y**2))<br>
+	</body>
+</html>
