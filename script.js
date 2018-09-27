@@ -47,11 +47,8 @@ class Projector {
 
 		//internal data
 		this.strokes = [];
-		this.inBuf = Array.from({length: this.width * this.height}, 
-			() => 'white');
-		this.outBuf = Array.from({length: this.width * this. height}, 
-			() => 'white');
 
+		//user's transformation function
 		this.transform = (x,y) => [x,y]
 	}
 
