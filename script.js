@@ -44,7 +44,7 @@ window.onload = () => {
 		});
 		reader.readAsDataURL(this.files[0]);
 	  });
-
+		projector.trippyMode = document.querySelector("#trippyMode").checked;
 	  document.querySelector("#trippyMode").addEventListener("change", function() {
 		  projector.trippyMode = !projector.trippyMode;
 	  })
