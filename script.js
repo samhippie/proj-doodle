@@ -29,6 +29,25 @@ window.onload = () => {
 	}
 	xTrans.onkeydown = inputSubmit;
 	yTrans.onkeydown = inputSubmit;
+
+	const image_input = document.querySelector("#image-input");
+	image_input.addEventListener("change", function() {
+		console.log("change")
+		const reader = new FileReader();
+		reader.addEventListener("load", () => {
+			console.log("load")
+		  const uploaded_image = reader.result;
+		  document.querySelector("#display-image").style.backgroundImage = `url(${uploaded_image})`;
+		  const image = new Image();
+		  image.src = uploaded_image;
+		  projector.drawImage(image);
+		});
+		reader.readAsDataURL(this.files[0]);
+	  });
+
+	  document.querySelector("#trippyMode").addEventListener("change", function() {
+		  projector.trippyMode = !projector.trippyMode;
+	  })
 }
 
 class Projector {
@@ -38,6 +57,9 @@ class Projector {
 		this.outCanvas = outCanvas;
 		this.width = inCanvas.width;
 		this.height = inCanvas.height;
+
+		this.baseSize = 2
+		this.trippyMode = false;
 
 		//brush info
 		this.brush = {
@@ -57,6 +79,13 @@ class Projector {
 		this.drawOutput();
 	}
 
+	drawImage(image) {
+		console.log('draw image');
+		const ctx = this.inCanvas.getContext('2d');
+		ctx.drawImage(image, 0, 0, this.width, this.height)
+		//this.drawOutput();
+	}
+
 	startStroke(event) {
 		if(!(event.buttons & 1)) return;
 		const rect = this.inCanvas.getBoundingClientRect();
@@ -72,7 +101,7 @@ class Projector {
 		this.strokes.push(stroke);
 
 		this.drawInput();
-		this.drawOutput();
+		//this.drawOutput();
 	}
 
 	continueStroke(event) {
@@ -85,14 +114,14 @@ class Projector {
 		this.strokes[this.strokes.length-1].points.push([x,y]);
 
 		this.drawInput();
-		this.drawOutput();
+		//this.drawOutput();
 	}
 
 	endStroke(event) {
 		const rect = this.inCanvas.getBoundingClientRect();
 		const x = event.clientX - rect.left;
 		const y = event.clientY - rect.top;
-		
+
 		//also add current location to stroke
 		this.strokes[this.strokes.length-1].points.push([x,y]);
 
@@ -120,28 +149,51 @@ class Projector {
 	}
 
 	drawOutput() {
-		//maps x,y from canvas to [-1,1]^2, flipping y
+		//maps x,y from canvas to [-baseSize,baseSize]^2, flipping y
 		const normalize = (x,y) => {
 			return [
-				2 * x / this.width - 1,
-				-1 * (2 * y / this.height - 1),
+				2 * this.baseSize * x / this.width - this.baseSize,
+				-1 * (2 * this.baseSize * y / this.height - this.baseSize),
 			];
 		}
-		//maps x,y back to canvas from [-1,1]^2, unflipping y
+		//maps x,y back to canvas from [-baseSize,baseSize]^2, unflipping y
 		const denormalize = (x,y) => {
 			return [
-				(x + 1) * this.width / 2,
-				((-1 * y) + 1) * this.height / 2,
+				(x + this.baseSize) * this.width / (2 * this.baseSize),
+				((-1 * y) + this.baseSize) * this.height / (2 * this.baseSize),
 			];
 		}
 		//combines this.transform with norm/denorm
 		//so user gets [-1,1], but canvas code is unchanged
-		const nTrans = (x,y) => 
+		const nTrans = (x,y) =>
 			denormalize(...this.transform(...normalize(x,y)));
 
 		const ctx = this.outCanvas.getContext('2d');
-		ctx.clearRect(0, 0, this.width, this.height);
+		const inCtx = this.inCanvas.getContext('2d');
+		const inData = inCtx.getImageData(0, 0, this.width, this.height).data;
+		inData[0] = 58;
+		const outData = new Uint8ClampedArray(inData.length).fill(200);
+		const pixelSize = this.trippyMode ? 1 : 4;
+		for (let i = 0; i < outData.length; i += pixelSize) {
+			const x = (i / pixelSize) % this.width;
+			const y = Math.trunc((i / pixelSize) / this.height);
+			let [newX, newY] = nTrans(x, y)
+			newX = Math.round(newX);
+			newY = Math.round(newY);
+			const newI = (newX + newY * this.width) * pixelSize
+			if (newI > 0 && newI < inData.length) {
+				for (let j = 0; j < pixelSize; j++) {
+					outData[i + j] = inData[newI + j]
+				}
+			}
+		}
+		//ctx.clearRect(0, 0, this.width, this.height);
+		const outImageData = new ImageData(outData, this.width, this.height);
+		console.log(inData);
+		console.log(outData);
+		ctx.putImageData(outImageData, 0, 0);
 
+		/*
 		//can't be lazy, have to draw every path
 		for(const stroke of this.strokes) {
 			ctx.lineWidth = stroke.size;
@@ -155,14 +207,15 @@ class Projector {
 			}
 			ctx.stroke();
 		}
+		*/
 	}
 
 	clear() {
-		this.strokes = [];
-		this.drawOutput();
 		//have to clear input manually
 		const ctx = this.inCanvas.getContext('2d');
 		ctx.clearRect(0, 0, this.width, this.height);
+		const outCtx = this.outCanvas.getContext('2d');
+		outCtx.clearRect(0, 0, this.width, this.height);
 	}
 }
 

@@ -17,15 +17,27 @@
 			)
 			<button id="trans-submit">Apply</button>
 		<br>
-		f: [-1,1]² → [-1,1]²
+		f: [-2,2]² → [-2,2]²
 		<br>
 		<button id="clear">Clear Canvas</button>
+		<label>
+		<input id="trippyMode" type="checkbox">
+		Trippy mode
+		</label>
+		<br>
 		<p>Draw on the left canvas. Set the output of f (with javascript syntax using x and y) to set the transformation. Click Apply to apply the transformation. </p>
+		<p>(actually, this is technically the inverse function now)</p>
 		<p>Here's a neat one:<p>
-		(x * Math.sqrt(x**2 + y**2) / Math.max(Math.abs(x), Math.abs(y)),<br>
-		y * Math.sqrt(x**2 + y**2) / Math.max(Math.abs(x), Math.abs(y)))<br>
+		x: x * Math.sqrt(x**2 + y**2) / Math.max(Math.abs(x), Math.abs(y))<br>
+		y: y * Math.sqrt(x**2 + y**2) / Math.max(Math.abs(x), Math.abs(y))<br>
 		<p>With inverse:</p>
-		(x * Math.max(Math.abs(x), Math.abs(y)) / Math.sqrt(x**2 + y**2),<br>
-		y * Math.max(Math.abs(x), Math.abs(y)) / Math.sqrt(x**2 + y**2))<br>
+		x: x * Math.max(Math.abs(x), Math.abs(y)) / Math.sqrt(x**2 + y**2)<br>
+		y: y * Math.max(Math.abs(x), Math.abs(y)) / Math.sqrt(x**2 + y**2)<br>
+		<br>
+		<label>
+			Image upload (if it doesn't update the input canvas, just try again, the code I copied and pasted probably sucks)<br>
+			<input type="file" id="image-input" accept="image/jpeg, image/png, image/jpg">
+			<div id="display-image"></div>
+		</label>
 	</body>
 </html>
